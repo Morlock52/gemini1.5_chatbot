@@ -2,7 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 from pypdf import PdfReader 
 import os, fitz, PIL.Image, time
-path2 = '/Users/....'
+
+MEDIA_PATH = os.environ.get("MEDIA_PATH", ".")
 
 def page_setup():
     st.header("Chat with different types of media/files!", anchor=False, divider="blue")
@@ -56,7 +57,7 @@ def delete_files_in_directory(directory_path):
 
 
 def setup_documents(pdf_file_path):
-    to_delete_path = path2
+    to_delete_path = MEDIA_PATH
     delete_files_in_directory(to_delete_path)
     doc = fitz.open(pdf_file_path)
     os.chdir(to_delete_path)
@@ -99,9 +100,8 @@ def main():
     elif typepdf == "Images":
         image_file_name = st.file_uploader("Upload your image file.",)
         if image_file_name:
-            path3 = '/Users/....'
             fpath = image_file_name.name
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             image_file = genai.upload_file(path=fpath2)
             
             while image_file.state.name == "PROCESSING":
@@ -127,10 +127,8 @@ def main():
     elif typepdf == "Video, mp4 file":
         video_file_name = st.file_uploader("Upload your video")
         if video_file_name:
-            path3 = '/Users/....'
             fpath = video_file_name.name
-            #st.write(fpath)
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             #st.write("Uploading file...")
             video_file = genai.upload_file(path=fpath2)
             #st.write(f"Completed upload: {video_file.uri}")
@@ -164,10 +162,9 @@ def main():
     elif typepdf == "Audio files":
         audio_file_name = st.file_uploader("Upload your audio")
         if audio_file_name:
-            path3 = '/Users/....'
             fpath = audio_file_name.name
 
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             audio_file = genai.upload_file(path=fpath2)
 
             while audio_file.state.name == "PROCESSING":

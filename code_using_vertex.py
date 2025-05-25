@@ -6,6 +6,8 @@ from vertexai.generative_models import GenerativeModel, Part
 from pypdf import PdfReader, PdfWriter, PdfMerger
 import os, time
 
+MEDIA_PATH = os.environ.get("MEDIA_PATH", ".")
+
 
 def page_setup():
     st.header("Chat with different types of media/files!", anchor=False, divider="blue")
@@ -56,11 +58,11 @@ def main():
         uploaded_files = st.file_uploader("Choose 1 or more files",  accept_multiple_files=True)
            
         if uploaded_files:
-            path_to_files = '/Users/....'
+            path_to_files = MEDIA_PATH
             merger = PdfMerger()
             for file in uploaded_files:
-                    file_name=file.name
-                    merger.append(path_to_files + file_name)
+                    file_name = file.name
+                    merger.append(os.path.join(path_to_files, file_name))
 
             os.chdir(path_to_files)
             fullfile = "merged_all_pages.pdf"
@@ -93,9 +95,8 @@ def main():
     elif typepdf == "Images":
         image_file_name = st.file_uploader("Upload your image file.",)
         if image_file_name:
-            path3 = '/Users/.....'
             fpath = image_file_name.name
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             image_file = genai.upload_file(path=fpath2)
             
             while image_file.state.name == "PROCESSING":
@@ -120,9 +121,8 @@ def main():
     elif typepdf == "Video, mp4 file":
         video_file_name = st.file_uploader("Upload your video")
         if video_file_name:
-            path3 = '/Users/....'
             fpath = video_file_name.name
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             video_file = genai.upload_file(path=fpath2)
             
             while video_file.state.name == "PROCESSING":
@@ -144,10 +144,9 @@ def main():
     elif typepdf == "Audio files":
         audio_file_name = st.file_uploader("Upload your audio")
         if audio_file_name:
-            path3 = '/Users/....'
             fpath = audio_file_name.name
 
-            fpath2 = (os.path.join(path3, fpath))
+            fpath2 = os.path.join(MEDIA_PATH, fpath)
             audio_file = genai.upload_file(path=fpath2)
 
             while audio_file.state.name == "PROCESSING":

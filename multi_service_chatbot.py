@@ -9,7 +9,7 @@ import google.generativeai as genai
 from llm_provider import LLMProvider
 
 
-MEDIA_PATH = '/Users/....'
+MEDIA_PATH = os.environ.get("MEDIA_PATH", ".")
 
 
 def page_setup() -> None:
