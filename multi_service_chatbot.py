@@ -88,6 +88,59 @@ def handle_image_chat(client: LLMProvider) -> None:
             genai.delete_file(uploaded.name)
 
 
+def handle_video_chat(client: LLMProvider) -> None:
+    video_file_name = st.file_uploader("Upload your video")
+    if not video_file_name:
+        return
+    fpath = video_file_name.name
+    fpath2 = os.path.join(MEDIA_PATH, fpath)
+    if client.provider == "openai":
+        st.warning("Video support for OpenAI is not implemented in this demo.")
+        return
+    uploaded = (
+        genai.upload_file(path=fpath2) if client.provider in {"google", "vertex"} else None
+    )
+    while uploaded and uploaded.state.name == "PROCESSING":
+        time.sleep(10)
+        uploaded = genai.get_file(uploaded.name)
+    if uploaded and uploaded.state.name == "FAILED":
+        raise ValueError(uploaded.state.name)
+    prompt = st.text_input("Enter your prompt.")
+    if prompt:
+        payload: List = [uploaded, prompt] if uploaded else [prompt]
+        st.write("Making LLM inference request...")
+        response = client.generate_content(payload)
+        st.markdown(response)
+        if uploaded:
+            genai.delete_file(uploaded.name)
+
+
+def handle_audio_chat(client: LLMProvider) -> None:
+    audio_file_name = st.file_uploader("Upload your audio")
+    if not audio_file_name:
+        return
+    fpath = audio_file_name.name
+    fpath2 = os.path.join(MEDIA_PATH, fpath)
+    if client.provider == "openai":
+        st.warning("Audio support for OpenAI is not implemented in this demo.")
+        return
+    uploaded = (
+        genai.upload_file(path=fpath2) if client.provider in {"google", "vertex"} else None
+    )
+    while uploaded and uploaded.state.name == "PROCESSING":
+        time.sleep(10)
+        uploaded = genai.get_file(uploaded.name)
+    if uploaded and uploaded.state.name == "FAILED":
+        raise ValueError(uploaded.state.name)
+    prompt = st.text_input("Enter your prompt.")
+    if prompt:
+        payload: List = [uploaded, prompt] if uploaded else [prompt]
+        response = client.generate_content(payload)
+        st.markdown(response)
+        if uploaded:
+            genai.delete_file(uploaded.name)
+
+
 def main() -> None:
     page_setup()
     media_type = get_media_type()
@@ -97,12 +150,21 @@ def main() -> None:
         "top_p": top_p,
         "max_output_tokens": max_tokens,
     }
-    client = LLMProvider(provider, model_name, generation_config=generation_config,
-                         temperature=temperature, max_tokens=max_tokens)
+    client = LLMProvider(
+        provider,
+        model_name,
+        generation_config=generation_config,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
     if media_type == "PDF files":
         handle_pdf_chat(client)
     elif media_type == "Images":
         handle_image_chat(client)
+    elif media_type == "Video, mp4 file":
+        handle_video_chat(client)
+    elif media_type == "Audio files":
+        handle_audio_chat(client)
     else:
         st.info("Media type not yet supported in this demo.")
 
